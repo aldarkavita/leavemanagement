@@ -1,0 +1,70 @@
+-- Create Database
+CREATE DATABASE elms_db;
+
+-- Use Database
+USE elms_db;
+
+-- 1. Roles Table
+CREATE TABLE Roles (
+    RoleId INT PRIMARY KEY IDENTITY(1,1),
+    RoleName VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- 2. Users Table
+CREATE TABLE Users (
+    UserId INT PRIMARY KEY IDENTITY(1,1),
+    Name VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    PasswordHash VARCHAR(255) NOT NULL,
+    RoleId INT NOT NULL,
+    ManagerId INT NULL,
+
+    CONSTRAINT FK_Users_Role
+        FOREIGN KEY (RoleId) REFERENCES Roles(RoleId),
+
+    --CONSTRAINT FK_Users_Manager
+    --    FOREIGN KEY (ManagerId) REFERENCES Users(UserId)
+);
+
+-- 3. LeaveTypes Table
+CREATE TABLE LeaveTypes (
+    LeaveTypeId INT PRIMARY KEY IDENTITY(1,1),
+    Name VARCHAR(50) NOT NULL UNIQUE,
+    MaxDaysPerYear INT NOT NULL
+);
+
+-- 4. LeaveRequests Table
+CREATE TABLE LeaveRequests (
+    LeaveRequestId INT PRIMARY KEY IDENTITY(1,1),
+    UserId INT NOT NULL,
+    LeaveTypeId INT NOT NULL,
+    StartDate DATE NOT NULL,
+    EndDate DATE NOT NULL,
+    Reason VARCHAR(500),
+    Status VARCHAR(20) CHECK (Status IN ('Pending', 'Approved', 'Rejected')) DEFAULT 'Pending',
+    ManagerComments VARCHAR(500),
+    AppliedDate DATETIME DEFAULT GETDATE(),
+
+    --CONSTRAINT FK_LeaveRequests_User
+    --    FOREIGN KEY (UserId) REFERENCES Users(UserId),
+
+    --CONSTRAINT FK_LeaveRequests_LeaveType
+    --    FOREIGN KEY (LeaveTypeId) REFERENCES LeaveTypes(LeaveTypeId)
+);
+
+-- 5. LeaveBalances Table
+CREATE TABLE LeaveBalances (
+    BalanceId INT PRIMARY KEY IDENTITY(1,1),
+    UserId INT NOT NULL,
+    LeaveTypeId INT NOT NULL,
+    RemainingDays INT NOT NULL DEFAULT 0,
+
+    --CONSTRAINT FK_LeaveBalances_User
+    --    FOREIGN KEY (UserId) REFERENCES Users(UserId),
+
+    --CONSTRAINT FK_LeaveBalances_LeaveType
+    --    FOREIGN KEY (LeaveTypeId) REFERENCES LeaveTypes(LeaveTypeId),
+
+    --CONSTRAINT UQ_User_LeaveType
+    --    UNIQUE (UserId, LeaveTypeId)
+);
